@@ -31,39 +31,49 @@ routes.put("/repositories/:id", (request, response) => {
   const { id } = request.params;
   const { title, url, techs } = request.body;
 
-  repositories.map(repo => {
-    if (repo.id === id) {
-      repo.title = title,
-      repo.url = url,
-      repo.techs = techs
-    }
-  })
+  const repoIndex = repositories.findIndex(repo => repo.id === id);
 
-  return response.json(repositories);
+  if (repoIndex < 0) {
+    return response.status(400).json({error: 'Index not found'});
+  }
+
+  repositories[repoIndex] = {
+    id,
+    title,
+    url,
+    techs,
+    likes: repositories[repoIndex].likes,
+  }
+
+  return response.json(repositories[repoIndex]);
 });
 
 routes.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;  
 
-  repositories.map((repo, index) => {
-    if (repo.id === id) {
-      repositories.splice(index)
-    }
-  })
+  const repoIndex = repositories.findIndex(repo => repo.id === id);
 
-  return response.json(repositories);
+  if (repoIndex < 0) {
+    return response.status(400).json({error: 'index not found'});
+  }
+
+  repositories.splice(repoIndex, 1);
+
+  return response.status(204).send();
 });
 
 routes.post("/repositories/:id/like", (request, response) => {
   const { id } = request.params;  
 
-  repositories.map(repo => {
-    if (repo.id === id) {
-      repo.likes ++;
-    }
-  })
+  const repoIndex = repositories.findIndex(repo => repo.id === id);
 
-  return response.json(repositories);
+  if (repoIndex < 0) {
+    return response.status(400).json({error: 'Index not found'});
+  }
+
+  repositories[repoIndex].likes++;
+
+  return response.status(200).json(repositories[repoIndex]);
 });
 
 module.exports = routes;
